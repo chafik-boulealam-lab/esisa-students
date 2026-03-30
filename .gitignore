@@ -1,3 +1,9 @@
+#Les miens
+venv/
+__pycache__/
+*.pyc
+.env
+
 # Logs
 logs
 *.log
