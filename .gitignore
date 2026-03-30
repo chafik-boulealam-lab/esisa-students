@@ -1,8 +1,9 @@
 #Les miens
+.env
 venv/
 __pycache__/
 *.pyc
-.env
+alembic/versions/
 
 # Logs
 logs
