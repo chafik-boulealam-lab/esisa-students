@@ -15,6 +15,7 @@ from app.services.cv_extractor import extract_text_from_pdf
 router = APIRouter(prefix="/api/candidates", tags=["candidates"])
 
 
+
 @router.get("/", response_model=List[CandidateResponse])
 def get_candidates(
     skip: int = 0,
