@@ -1,10 +1,10 @@
 """Candidates API routes"""
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional, cast
 
 from app.core.dependencies import get_db, get_current_user
-from app.models.models import Candidate, User
+from app.models.models import Candidate, User, UserRole
 from app.schemas.candidate import CandidateResponse, CandidateCreate, CandidateUpdate
 
 router = APIRouter(prefix="/api/candidates", tags=["candidates"])
@@ -107,7 +107,8 @@ def get_my_candidate_profile(
     db: Session = Depends(get_db)
 ):
     """Get my candidate profile (authenticated candidate only)"""
-    if current_user.role != "candidate":
+    current_user_role = cast(UserRole, current_user.role)
+    if current_user_role != UserRole.candidate:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only candidates can access this endpoint"
@@ -131,7 +132,8 @@ def create_or_update_my_profile(
     db: Session = Depends(get_db)
 ):
     """Create or update my candidate profile (authenticated candidate only)"""
-    if current_user.role != "candidate":
+    current_user_role = cast(UserRole, current_user.role)
+    if current_user_role != UserRole.candidate:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only candidates can access this endpoint"
