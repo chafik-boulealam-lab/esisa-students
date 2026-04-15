@@ -12,21 +12,21 @@ export interface JobCriteria {
 export const jobsApi = {
   // Get all job criteria
   getJobs: (skip = 0, limit = 100) =>
-    apiClient.get<JobCriteria[]>('/criteria/', { params: { skip, limit } }),
+    apiClient.get<JobCriteria[]>('/api/criteria/', { params: { skip, limit } }),
 
   // Get a specific job criteria
   getJob: (id: number) =>
-    apiClient.get<JobCriteria>(`/criteria/${id}`),
+    apiClient.get<JobCriteria>(`/api/criteria/${id}`),
 
   // Create a job criteria
   createJob: (data: { title: string; description: string; criteria_skills?: Array<{ skill_id: number; weight: number }> }) =>
-    apiClient.post<JobCriteria>('/criteria/', data),
+    apiClient.post<JobCriteria>('/api/criteria/', data),
 
   // Update a job criteria
   updateJob: (id: number, data: Partial<JobCriteria>) =>
-    apiClient.put<JobCriteria>(`/criteria/${id}`, data),
+    apiClient.put<JobCriteria>(`/api/criteria/${id}`, data),
 
   // Delete a job criteria
   deleteJob: (id: number) =>
-    apiClient.delete(`/criteria/${id}`),
+    apiClient.delete(`/api/criteria/${id}`),
 };
