@@ -16,6 +16,12 @@ export const matchingApi = {
       params: { candidate_id: candidateId, criteria_id: criteriaId, skip, limit },
     }),
 
+  // Get match results for a criteria
+  getCriteriaResults: (criteriaId: number, skip = 0, limit = 100) =>
+    apiClient.get<MatchResult[]>(`/matching/${criteriaId}/results`, {
+      params: { skip, limit },
+    }),
+
   // Get a specific match result
   getMatchResult: (id: number) =>
     apiClient.get<MatchResult>(`/api/matching/results/${id}`),
