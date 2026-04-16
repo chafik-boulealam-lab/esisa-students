@@ -6,8 +6,8 @@ MODES:
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
-from typing import List, Optional, Dict, Tuple
-from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Tuple, cast
+from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
 
@@ -383,55 +383,15 @@ async def create_job_criteria(
     
     db.commit()
     db.refresh(db_criteria)
-
-    return _build_criteria_response(db_criteria, db)
-
-
-@router.get("/criteria", response_model=List[JobCriteriaResponse])
-async def list_criteria(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db)
-) -> List[JobCriteriaResponse]:
-    items = db.query(JobCriteria).order_by(JobCriteria.created_at.desc()).offset(skip).limit(limit).all()
-    return [_build_criteria_response(item, db) for item in items]
-
-
-@router.put("/criteria/{criteria_id}", response_model=JobCriteriaResponse)
-async def update_criteria(
-    criteria_id: int,
-    payload: JobCriteriaUpdate,
-    db: Session = Depends(get_db)
-):
-    criteria = db.query(JobCriteria).filter(JobCriteria.id == criteria_id).first()
-    if not criteria:
-        raise HTTPException(status_code=404, detail="Criteria not found")
-
-    if payload.title is not None:
-        criteria.title = payload.title
-    if payload.description is not None:
-        criteria.description = payload.description
-    if payload.required_skills is not None:
-        _replace_criteria_skills(db, criteria_id, payload.required_skills)
-
-    db.commit()
-    db.refresh(criteria)
-    return _build_criteria_response(criteria, db)
-
-
-@router.delete("/criteria/{criteria_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_criteria(
-    criteria_id: int,
-    db: Session = Depends(get_db)
-):
-    criteria = db.query(JobCriteria).filter(JobCriteria.id == criteria_id).first()
-    if not criteria:
-        raise HTTPException(status_code=404, detail="Criteria not found")
-
-    db.query(CriteriaSkill).filter(CriteriaSkill.criteria_id == criteria_id).delete()
-    db.query(MatchResult).filter(MatchResult.criteria_id == criteria_id).delete()
-    db.delete(criteria)
-    db.commit()
+    
+    return JobCriteriaResponse(
+        id=cast(int, db_criteria.id),
+        recruiter_id=cast(int, db_criteria.recruiter_id),
+        title=cast(str, db_criteria.title),
+        description=cast(str, db_criteria.description),
+        created_at=cast(datetime, db_criteria.created_at),
+        required_skills=criteria.required_skills
+    )
 
 
 @router.post("/search/{criteria_id}")
@@ -546,9 +506,17 @@ async def get_candidate_match_analysis(
             {"name": cs.skill.name, "weight": cs.weight}
             for cs in criteria_skills
         ]
-        criteria = db.query(JobCriteria).filter(JobCriteria.id == criteria_id).first()
-        if criteria:
-            criteria_title = criteria.title
+        
+        # Now returns tuple (score, details)
+        score, details = calculate_match_score(candidate, criteria_skills_dict)
+        
+        matches.append(CandidateMatchResponse(
+            candidate_id=cast(int, candidate.id),
+            full_name=cast(str, candidate.full_name),
+            email=cast(str, candidate.email),
+            match_score=score,
+            explanation=details.get("details", "")
+        ))
     
     # Calculate match score with enhanced metrics
     score, details = calculate_match_score(
@@ -630,6 +598,63 @@ def _get_gaps(candidate: Candidate, details: Dict) -> List[str]:
         gaps.append("Company background extraction unavailable")
     
     return gaps
+
+
+@router.post("/calculate/{candidate_id}/{criteria_id}", response_model=MatchResultResponse)
+async def calculate_match(
+    candidate_id: int,
+    criteria_id: int,
+    db: Session = Depends(get_db)
+):
+    """Calculate match score for one candidate and one criteria."""
+    candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+
+    criteria = db.query(JobCriteria).filter(JobCriteria.id == criteria_id).first()
+    if not criteria:
+        raise HTTPException(status_code=404, detail="Criteria not found")
+
+    criteria_skills = db.query(CriteriaSkill).filter(
+        CriteriaSkill.criteria_id == criteria_id
+    ).all()
+
+    criteria_skills_dict = [
+        {"name": cs.skill.name, "weight": cs.weight}
+        for cs in criteria_skills
+    ]
+
+    score = calculate_match_score(candidate, criteria_skills_dict)
+    explanation = (
+        f"Matched {len([s for s in criteria_skills_dict if s['name'] in [cs.skill.name for cs in candidate.candidate_skills]])} required skills"
+        if criteria_skills_dict else "No skills defined for criteria"
+    )
+
+    match_result = MatchResult(
+        criteria_id=criteria_id,
+        candidate_id=candidate_id,
+        score=score,
+        explanation=explanation
+    )
+    db.add(match_result)
+    db.commit()
+    db.refresh(match_result)
+
+    return match_result
+
+
+@router.get("/{criteria_id}/results", response_model=List[MatchResultResponse])
+async def get_criteria_results(
+    criteria_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Get all match results for a specific criteria."""
+    results = db.query(MatchResult).filter(
+        MatchResult.criteria_id == criteria_id
+    ).offset(skip).limit(limit).all()
+    return results
 
 
 # ============================================================================
@@ -731,8 +756,8 @@ async def generate_and_match(
 
 @router.get("/results", response_model=List[MatchResultResponse])
 async def get_match_results(
-    criteria_id: int = None,
-    candidate_id: int = None,
+    criteria_id: Optional[int] = None,
+    candidate_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
@@ -740,9 +765,9 @@ async def get_match_results(
     """Get all match results"""
     query = db.query(MatchResult)
     
-    if criteria_id:
+    if criteria_id is not None:
         query = query.filter(MatchResult.criteria_id == criteria_id)
-    if candidate_id:
+    if candidate_id is not None:
         query = query.filter(MatchResult.candidate_id == candidate_id)
     
     results = query.offset(skip).limit(limit).all()
@@ -759,4 +784,10 @@ async def get_criteria(
     if not criteria:
         raise HTTPException(status_code=404, detail="Criteria not found")
     
-    return _build_criteria_response(criteria, db)
+    return JobCriteriaResponse(
+        id=cast(int, criteria.id),
+        recruiter_id=cast(int, criteria.recruiter_id),
+        title=cast(str, criteria.title),
+        description=cast(str, criteria.description),
+        created_at=cast(datetime, criteria.created_at)
+    )
