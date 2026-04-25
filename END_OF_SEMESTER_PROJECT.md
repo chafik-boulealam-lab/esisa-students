@@ -1,87 +1,75 @@
-# End-of-Semester Project — Official Guidelines (English / Français)
+# Projet de fin de semestre — Consignes pour les étudiants
 
-## Purpose
-Act as Academic Assistant to launch the End-of-Semester project for Groups A–D. Provide bilingual (EN/FR) guidelines, a student README template, a short Google Chat post (EN/FR), a checklist, and example CI/deploy templates.
+Bonjour — voici les consignes officielles pour le projet de fin de semestre (Groupes A–D). Ce document s'adresse aux étudiants : il contient les attentes techniques, la checklist, le modèle de README, et les exigences de présentation.
 
----
+## Objectif
+Travaillez en groupes de 3 à 5 étudiants pour produire un projet complet, déployé et présentable. Visez des standards professionnels : code lisible, historique Git clair (commits/branches), tests et déploiement public.
 
-## Project Requirements (must include in announcement)
+## Contraintes techniques obligatoires
+- Langage principal : le cœur logique de l'application doit être développé en **C**.
+- Architecture : séparation Backend / Frontend.
+- Intégration IA (obligatoire) : chaque projet doit intégrer au moins une API d'IA (chatbot, reconnaissance vocale, analyse d'image, traduction, etc.). Plusieurs fonctionnalités IA sont encouragées.
+- Base de données : utilisez exclusivement des bases cloud — **Supabase** ou **MongoDB**. **SQLite est interdit** pour la version finale.
+- Déploiement : le produit final doit être déployé et accessible publiquement (web, mobile ou desktop).
 
-- Core Language: C — the application's core logic must be implemented in C.
-- Architecture: Backend / Frontend separation.
-- AI Integration (mandatory): Integrate at least one AI API (chatbot, speech-to-text, image analysis, translation, etc.). Multiple AI features encouraged.
-- Database: Use cloud databases only — Supabase or MongoDB. SQLite is forbidden.
-- Deployment: Final product must be deployed and publicly accessible (web, mobile, or desktop).
-- GitHub Workflow: All students must show visible activity (commits/pushes/branches). Professor Chafik Bouallam must be invited to each repository.
+## Étapes à suivre (pour les étudiants)
+1. Constituez votre groupe (3–5 étudiants).
+2. Créez un dépôt sous l'organisation `chafik-boulealam-lab` en respectant la convention : `project-<groupe>-<sujet>`.
+3. Ajoutez un README conforme au modèle ci-dessous, implémentez le projet et déployez-le publiquement. Ajoutez le lien de déploiement au README.
+4. Invitez le professeur Chafik Bouallam (github.com/chafik-boulealam-esisa) comme collaborateur sur le dépôt.
 
----
+## Modèle de README (à copier dans chaque dépôt)
 
-## Execution Steps (for students)
+Titre : <Nom du projet>
 
-1. Form your group (3–5 students).
-2. Create a repository under the organization `chafik-boulealam-lab` using the naming convention `project-<group>-<topic>`.
-3. Add a README using the template below, implement the project, deploy it publicly, and include the deployment link in the README.
-4. Invite Professor Chafik Bouallam (github.com/chafik-boulealam-esisa) as a collaborator on the repository.
+Membres :
+- Prénom Nom (rôle, GitHub username)
 
----
+Description :
+- Brève description du projet, stack technique, fonctionnalités IA, et lien de déploiement.
 
-## Repository README Template
+Checklist obligatoire :
+- Cœur logique en C : indiquer l'emplacement du code C dans le dépôt.
+- Base cloud : informations de connexion (ne pas committer de secrets).
+- APIs IA : liste des services utilisés et où ils sont intégrés.
+- Lien de déploiement : URL publique du projet.
 
-Title: <Project Title>
+Comment lancer : (exemple)
+1. Installer les dépendances
+2. Compiler le backend C : `make build` (ou instructions similaires)
+3. Lancer : `./bin/app`
 
-Members:
-- Name (role, GitHub username)
+Liens utiles :
+- DEMO : https://<votre-deploiement>
+- Publication LinkedIn : <URL de votre post LinkedIn>
 
-Description:
-- Short description of the project, tech stack, AI features, and deployment link.
+## Exigences de présentation et rendu final
+- Préparez une présentation visuelle et concise (évitez de lire les diapositives).
+- Première diapositive : logo ESISA, nom du projet, membres, et liste des examinateurs.
+- Enregistrez une vidéo de démonstration et placez le lien dans le README.
+- Le dépôt GitHub doit montrer une activité visible et professionnelle de tous les membres (commits, branches, messages clairs).
+- À la fin, publiez la démonstration sur LinkedIn et ajoutez le lien dans le README.
 
-Requirements checklist:
-- Core logic in C: description of where the C code lives.
-- Cloud DB: Supabase or MongoDB connection info (do not commit credentials).
-- AI APIs: list of services and where they are integrated.
-- Deployment link: URL to live application.
+Professeurs / jury à mentionner :
+- Professeur Boulealam Chafik
+- Professeur Mehdi Iraqi Houssaini
+- Directeur Mekouar Khalid
+- Othman Mekouar
+- Mekouar Youssef
 
-How to run (short):
-1. Build steps (install deps, build C backend, run frontend)
-2. Example: `make build && ./bin/app`
+## Publications courtes (texte prêt à copier)
 
-Links:
-- DEMO: https://<deployed-url>
-- LinkedIn post: <LinkedIn post URL>
+FR (court — pour Google Chat) :
+```
+Lancement du projet de fin de semestre — Groupes de 3–5. Coeur en C, DB cloud (Supabase/MongoDB), IA obligatoire. Créez votre dépôt sous chafik-boulealam-lab et invitez le Prof. Chafik Boulealam. Détails : https://github.com/chafik-boulealam-lab/esisa-students/blob/main/END_OF_SEMESTER_PROJECT.md
+```
 
----
+EN (court — optionnel) :
+```
+End-of-Semester Project launched — Groups of 3–5. Core logic in C, cloud DB (Supabase/MongoDB), AI integration required. Create a repo under chafik-boulealam-lab and invite Prof. Chafik Boulealam. Details: https://github.com/chafik-boulealam-lab/esisa-students/blob/main/END_OF_SEMESTER_PROJECT.md
+```
 
-## Presentation & Demo Requirements (Final Project)
-
-- Prepare a clear, visual presentation focused on key points. Minimize text — presenters should not read long slides.
-- First slide must include: ESISA logo, project name, team members, professor and jury names:
-  - Professor boulealam chafik
-  - Professor Mehdi Iraqi Houssaini
-  - Director Mekouar Khalid
-  - Othman Mekouar
-  - Mekouar youssef
-- Record a video demo of your project and include the recording link in the repository README.
-- The GitHub repository must show professional commits from all group members (visible activity and proper branching/commit history).
-- Upon completion, post the demo video on LinkedIn and include the LinkedIn post URL in the repository README.
-
----
-
-## Short Google Chat Posts (copy-ready)
-
-EN:
-> End-of-Semester Project launched — Groups of 3–5. Core logic in C, cloud DB (Supabase/MongoDB), AI integration required. Create repo under chafik-boulealam-lab, invite Prof. Chafik Bouallam. Full details: see repository `esisa-students/END_OF_SEMESTER_PROJECT.md`.
-
-FR:
-> Lancement du projet de fin de semestre — Groupes de 3–5. Coeur en C, DB cloud (Supabase/MongoDB), IA obligatoire. Créez votre dépôt sous chafik-boulealam-lab et invitez le Prof. Chafik Bouallam. Détails: `esisa-students/END_OF_SEMESTER_PROJECT.md`.
-
-Replace the final `Full details` link with the real GitHub URL after this file is pushed to the org repo.
-
----
-
-## Example CI / Deployment Templates
-
-1) Dockerfile (C backend example)
-
+## Exemple rapide : Dockerfile (backend C)
 ```
 FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y build-essential
@@ -91,65 +79,13 @@ RUN gcc -O2 -std=c11 -o app src/main.c
 CMD ["./app"]
 ```
 
-2) GitHub Actions — Build and push Docker image (GHCR)
+## Bonnes pratiques
+- N'ajoutez jamais de secrets en clair dans le dépôt. Utilisez des variables d'environnement ou des services de secret management.
+- Documentez les étapes d'installation et d'exécution dans le README.
 
-```
-name: Build and publish Docker image
-on: [push]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }} .
-      - name: Log in to GHCR
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push image
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
-```
-
-3) GitHub Actions — Deploy to Vercel (example)
-
-```
-name: Deploy to Vercel
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-organization-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-```
-
-Notes: set required secrets (e.g., `GITHUB_TOKEN`, `VERCEL_TOKEN`) in the repo settings. Do not store tokens in source.
+## Contact
+En cas de question, contactez le professeur : ch.boulealam@esisa.ac.ma
 
 ---
-
-## Posting & Permissions
-
-- Do not commit secrets. Use repository secrets or environment variables.
-- If you want me to commit this file to a GitHub repo under `chafik-boulealam-lab`, provide explicit confirmation to use the token in `.env` and confirm the target repo name.
-
----
-
-## Contact / Reporting
-
-After posting and updating GitHub, provide the links and I will produce a short status report for each Team.
-
----
-
+Fin du document.
 End of file.
