@@ -8,6 +8,14 @@ Ce document est une fiche pratique et pédagogique destinée aux étudiants : il
 
 - Public : étudiants en fin de cycle (groupes de 3–5).
 - Objectif : produire un produit logiciel professionnel, déployé, testé et documenté, intégrant au moins une composante IA.
+- Supervision : Prof. Mehdi Iraqi Houssaini (Course) et Prof. Chafik Boulealam (TP).
+
+---
+
+## Calendrier
+
+- Durée du projet : 1 mois.
+- Soutenance finale (date fixe) : 30/05/2026.
 
 ---
 
@@ -24,30 +32,29 @@ Ce document est une fiche pratique et pédagogique destinée aux étudiants : il
 
 ---
 
-## Feuille de route (phases et tâches)
+## Feuille de route condensée (4 semaines)
 
-1) Conception & définition (Semaine 1)
-	- Rédiger la problématique, objectifs et critères de succès.
-	- Rendre le document d'architecture (format court + diagramme).
-	- Livrable : `docs/architecture.md`, backlog minimal.
+Semaine 1 — Conception & prototype
 
-2) Prototype & architecture technique (Semaine 2)
-	- Choisir le pattern d'intégration IA (local, hybride, cloud).
-	- Définir la structure du dépôt et les points d'intégration C ↔ IA.
-	- Livrable : prototype minimal exécutable, diagramme d'intégration.
+- Rédiger la problématique, objectifs mesurables et critères de succès.
+- Documenter l'architecture (diagramme) et fournir un prototype minimal exécutable.
+- Livrable : `docs/architecture.md`, prototype minimal.
 
-3) Implémentation (Semaines 3–6)
-	- Développement du backend C (API minimale ou binaire CLI).
-	- Intégration des modèles IA (microservice ou inference locale).
-	- Tests unitaires & d'intégration.
+Semaine 2 — Implémentation initiale
 
-4) Déploiement & CI (Semaines 7–8)
-	- Mise en place du pipeline CI (GitHub Actions recommandé).
-	- Déploiement selon cible : Vercel (web), Expo (mobile), Itch.io (desktop).
+- Implémenter le backend C (cœur logique) et intégrer la première fonctionnalité IA.
+- Mettre en place les tests unitaires essentiels.
 
-5) Préparation soutenance & diffusion (Semaine 9)
-	- Slides professionelles, vidéo démo, post LinkedIn.
-	- Checklist finale et validation des critères d'évaluation.
+Semaine 3 — Tests & intégration continue
+
+- Étendre les tests, corriger les bugs, mesurer précision/latence IA.
+- Configurer CI (GitHub Actions recommandé) et préparer le pipeline de déploiement.
+
+Semaine 4 — Déploiement, finalisation et soutenance
+
+- Déployer la version de production (Vercel / Expo / Itch.io selon cible).
+- Préparer les slides, enregistrer la vidéo démo (5–10 min) et publier sur LinkedIn.
+- Finaliser la checklist et valider les critères avant la soutenance du 30/05/2026.
 
 ---
 
@@ -117,11 +124,11 @@ La base locale de développement doit être **SQLite** (fichier `data/local.db`)
 
 ## Critères d’évaluation (rapide)
 
-- Fonctionnalité & Qualité : 40%
-- Intégration IA : 20%
-- Qualité du code & tests : 20%
-- Déploiement & accessibilité : 10%
-- Présentation & vidéo : 10%
+- Fonctionnalité & Qualité (20%) — Le projet fonctionne comme décrit et couvre les exigences.
+- Intégration IA (20%) — Pertinence et qualité de l'intégration IA.
+- Qualité du code & tests (10%) — Propreté, structure, tests.
+- Déploiement & accessibilité (10%) — Application déployée et accessible.
+- Présentation & vidéo (40%) — Clarté et professionnalisme de la soutenance et du matériel (LinkedIn, Video, Branding).
 
 ---
 
