@@ -81,6 +81,7 @@ project-<groupe>-<sujet>/
 ### Présence sur les réseaux / Branding professionnel
 
 - **Enregistrement vidéo :** chaque équipe doit produire une vidéo démonstrative (5–10 minutes) montrant l'usage, l'architecture et la valeur ajoutée.
+ - **Enregistrement vidéo :** chaque équipe doit produire une vidéo démonstrative (1.5–2 minutes maximum) montrant l'usage, l'architecture et la valeur ajoutée.
 - **Publication LinkedIn :** Publiez la vidéo et un court résumé sur LinkedIn (compte d'un membre) et insérez le lien dans le `README.md`.
 
 ---

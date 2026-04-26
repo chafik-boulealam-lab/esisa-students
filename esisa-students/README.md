@@ -28,7 +28,7 @@ Ce document est une fiche pratique et pédagogique destinée aux étudiants : il
 | Backend (C) | Cœur logique compilable | Code en C + instructions build |
 | Tests | Unitaires & intégration | CI ou scripts de test reproductibles |
 | Déploiement | URL publique ou page distrib. | Vercel / Expo / Itch.io selon cible |
-| Vidéo démo | 5–10 minutes | Lien dans README + post LinkedIn |
+| Vidéo démo | 1.5–2 minutes maximum | Lien dans README + post LinkedIn |
 
 ---
 
@@ -55,7 +55,7 @@ Semaine 3 — Parsing JSON & intégration
 Semaine 4 — Déploiement, finalisation et soutenance
 
 - Déployer la version de production (Vercel / Expo / Itch.io selon cible).
-- Préparer les slides, enregistrer la vidéo démo (5–10 min) et publier sur LinkedIn.
+- Préparer les slides, enregistrer la vidéo démo (1.5–2 minutes maximum) et publier sur LinkedIn.
 - Finaliser la checklist et valider les critères avant la soutenance du 30/05/2026.
 
 ---
