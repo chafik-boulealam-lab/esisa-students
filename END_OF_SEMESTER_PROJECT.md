@@ -23,6 +23,9 @@ Ce document décrit, de façon exhaustive et pédagogique, les exigences, les li
 - **Langage principal :** Le cœur logique doit être développé en **C**. Les bindings, wrappers ou services complémentaires peuvent être en d'autres langages.
 - **Architecture :** Respectez une séparation claire Backend / Frontend. Le backend (logique métier, traitements IA côté serveur si applicable) doit être indépendant du client.
 - **Intégration IA (obligatoire) :** Au moins une fonctionnalité IA (chatbot, STT, reconnaissance d'images, traduction, etc.). Expliquez l'architecture IA et les APIs utilisées.
+ - **Intégration IA (obligatoire, API-only) :** Au moins une fonctionnalité IA utilisant une API externe (chatbot, STT, analyse d'images, traduction, etc.). Les étudiants doivent consommer des APIs REST publiques ou cloud (ex. OpenAI, Gemini, Mistral) : le backend en C envoie des requêtes HTTP (par ex. via `libcurl`) et récupère des réponses JSON que l'application parse et utilise.
+  
+	- Note pédagogique : il n'est pas nécessaire de concevoir, entraîner ou déployer des modèles locaux. L'évaluation portera sur la qualité et la créativité de l'usage de l'API (conception des appels, gestion des erreurs et des limites de taux, parsing JSON, intégration UX), et non sur l'entraînement/fine-tuning de modèles.
 - **Base de données :**
 	- **Local (développement / portable) :** **SQLite** est requis comme base locale pour assurer portabilité et tests hors-ligne.
 	- **Déploiement (production) :** les projets déployés doivent utiliser une base cloud (**Supabase** ou **MongoDB**). N'envoyez pas de credentials en clair.
@@ -78,6 +81,7 @@ project-<groupe>-<sujet>/
 ### Présence sur les réseaux / Branding professionnel
 
 - **Enregistrement vidéo :** chaque équipe doit produire une vidéo démonstrative (5–10 minutes) montrant l'usage, l'architecture et la valeur ajoutée.
+ - **Enregistrement vidéo :** chaque équipe doit produire une vidéo démonstrative (1.5–2 minutes maximum) montrant l'usage, l'architecture et la valeur ajoutée.
 - **Publication LinkedIn :** Publiez la vidéo et un court résumé sur LinkedIn (compte d'un membre) et insérez le lien dans le `README.md`.
 
 ---
@@ -98,6 +102,7 @@ project-<groupe>-<sujet>/
 
 - Fonctionnalité & Qualité (20%) — Le projet fonctionne comme décrit et couvre les exigences.
 - Intégration IA (20%) — Pertinence et qualité de l'intégration IA.
+ - Intégration IA (20%) — Évaluée sur l'utilisation réussie et créative d'API externes : qualité des appels API, robustesse (gestion des erreurs/timeouts), parsing JSON correct et intégration dans l'application. L'entraînement ou la construction de modèles locaux n'est pas requis ni attendu.
 - Qualité du code & tests (10%) — Propreté, structure, tests.
 - Déploiement & accès public (10%) — Application déployée et accessible.
 - Présentation & vidéo (40%) — Clarté et professionnalisme de la soutenance et du matériel (LinkedIn, Video, Branding).

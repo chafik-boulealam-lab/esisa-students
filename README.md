@@ -28,7 +28,7 @@ Ce document est une fiche pratique et pédagogique destinée aux étudiants : il
 | Backend (C) | Cœur logique compilable | Code en C + instructions build |
 | Tests | Unitaires & intégration | CI ou scripts de test reproductibles |
 | Déploiement | URL publique ou page distrib. | Vercel / Expo / Itch.io selon cible |
-| Vidéo démo | 5–10 minutes | Lien dans README + post LinkedIn |
+| Vidéo démo | 1.5–2 minutes maximum | Lien dans README + post LinkedIn |
 
 ---
 
@@ -40,20 +40,22 @@ Semaine 1 — Conception & prototype
 - Documenter l'architecture (diagramme) et fournir un prototype minimal exécutable.
 - Livrable : `docs/architecture.md`, prototype minimal.
 
-Semaine 2 — Implémentation initiale
 
-- Implémenter le backend C (cœur logique) et intégrer la première fonctionnalité IA.
-- Mettre en place les tests unitaires essentiels.
+Semaine 2 — Intégration API & prototype
 
-Semaine 3 — Tests & intégration continue
+- Implémenter le backend en C (cœur logique) et réaliser les premiers appels vers une API IA externe (tester d'abord avec Postman, `curl` ou un petit script C utilisant `libcurl`).
+- Livrable : un prototype minimal qui effectue une requête POST/GET vers une API IA et enregistre la réponse en JSON.
 
-- Étendre les tests, corriger les bugs, mesurer précision/latence IA.
-- Configurer CI (GitHub Actions recommandé) et préparer le pipeline de déploiement.
+Semaine 3 — Parsing JSON & intégration
+
+- Parser les réponses JSON reçues des APIs en C (par ex. `cJSON` ou parsing simple) et intégrer les résultats dans le flux applicatif.
+- Gérer les erreurs réseau, les limites de taux, et prévoir des tests unitaires pour les appels API.
+- Configurer CI (tests de compilation et tests rapides d'intégration). 
 
 Semaine 4 — Déploiement, finalisation et soutenance
 
 - Déployer la version de production (Vercel / Expo / Itch.io selon cible).
-- Préparer les slides, enregistrer la vidéo démo (5–10 min) et publier sur LinkedIn.
+- Préparer les slides, enregistrer la vidéo démo (1.5–2 minutes maximum) et publier sur LinkedIn.
 - Finaliser la checklist et valider les critères avant la soutenance du 30/05/2026.
 
 ---
@@ -71,37 +73,33 @@ Semaine 4 — Déploiement, finalisation et soutenance
 
 ---
 
-## Architecture recommandée — « Hybrid Deep Learning Architecture »
+## Intégration IA centrée sur les API (approche API-Centric)
 
-Résumé : un design « hybride » combine des composants légers exécutés localement (faible latence, offline, confidentialité) et des composants lourds exécutés côté serveur (GPU, entraînement, modèles volumineux). Cette approche maximise la portabilité tout en permettant des performances élevées en production.
+Résumé : pour ce projet destiné à des étudiants en première année (sans prérequis en apprentissage automatique), l'intégration IA doit se faire exclusivement via des APIs externes (REST). Il n'est pas nécessaire de concevoir, entraîner ou déployer des modèles locaux. L'objectif est d'apprendre à consommer une API, gérer la communication, et intégrer la réponse JSON dans une application en C.
 
 Principes clefs :
 
-- **Séparation des responsabilités** : le cœur en C gère la logique critique et le prétraitement, la couche IA est exposée via une API interne (REST/gRPC) ou via un binding FFI quand la latence est critique.
-- **Modularité** : encapsulez l’inférence dans un microservice distinct (ex. FastAPI, TorchServe, Triton) afin de pouvoir mettre à jour le modèle indépendamment.
-- **Interopérabilité** : exportez les modèles en ONNX/TFLite pour faciliter l’inférence depuis des clients non-Python (C, WebAssembly, mobile).
-- **Fallback local** : sur l’appareil/local, fournissez un modèle léger quantifié (ONNX / TFLite) pour permettre une dégradation gracieuse hors-ligne; la base locale SQLite stocke les entrées et résultats pour synchronisation.
+- **Appels REST depuis le backend C** : le backend en C envoie des requêtes HTTP vers des services IA externes (ex. OpenAI, Gemini, Mistral) et reçoit des réponses au format JSON.
+- **Outils recommandés (débutants)** : tester d'abord les appels avec `Postman`, `curl` ou un petit script Python. Ensuite intégrer dans C avec `libcurl` (ou `system("curl ...")` pour un prototype rapide).
+- **Parsing JSON** : utilisez une bibliothèque simple comme `cJSON` ou `jansson` pour analyser les réponses JSON en C, ou mettez en place un parsing minimal si vous préférez.
+- **Sécurité** : stockez les clés API dans des variables d'environnement (ne commitez jamais de secrets).
+- **Robustesse** : gérez les erreurs réseau, les codes HTTP non-200, les timeouts et les limites de taux.
 
-Flux de données (exemple simple) :
+Flux simple recommandé :
 
-1. Entrée utilisateur → prétraitement local (C)
-2. Si inference légère possible → local ONNX/TFLite inference
-3. Sinon → requête au microservice IA (REST/gRPC) pour inference lourde
-4. Résultat → post-traitement local + stockage (SQLite local), puis synchronisation vers DB cloud si disponible
+1. Entrée utilisateur → prétraitement en C
+2. Requête HTTP (POST/GET) vers une API IA (JSON)
+3. Réponse JSON → parsing en C → post-traitement
+4. Stockage local (SQLite) et affichage dans l'interface
 
-Recommandations d’implémentation :
+Bonnes pratiques d'implémentation :
 
-- Entraînement & experimentation : Python + PyTorch/Lightning (env. GPU)
-- Conversion modèle : exporter en ONNX, vérifier quantification (INT8) pour déploiement edge
-- Serving : FastAPI + Uvicorn / TorchServe / Triton selon contraintes
-- Client C : utiliser `libcurl` ou sockets pour communiquer avec le service IA, ou lier ONNX Runtime C API pour inference intégrée
-- Observabilité : journalisation, métriques, et tests de robustesse sur cas limites
+- Testez vos requêtes avec Postman/curl avant d'intégrer en C.
+- Commencez par un prototype minimal (faire une requête, afficher la réponse brute), puis améliorez le parsing et l'UX.
+- Écrivez des tests unitaires autour des fonctions qui effectuent les appels et parsings.
+- Documentez comment exécuter des appels API (exemples `curl`) et comment fournir la variable d'environnement contenant la clé.
 
-Considérations pratiques :
-
-- Protégez les données sensibles avant synchronisation.
-- Pensez à la taille du modèle pour mobile/desktop.
-- Mesurez latence & précision et documentez un plan de dégradation.
+Conseil pédagogique : concentrez-vous sur la qualité du code C (organisation, tests), la gestion des erreurs et l'intégration claire de la réponse API dans l'application — c'est ce qui sera évalué.
 
 ---
 
