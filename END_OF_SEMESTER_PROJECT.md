@@ -11,7 +11,7 @@ Nous lançons officiellement les projets de fin de semestre. Cette année, vous 
 - **Langage principal :** Le cœur logique de l'application doit être développé en **C**.
 - **Architecture :** Séparation Backend / Frontend.
 - **Intégration IA (obligatoire) :** Intégrez au moins une API d'IA (chatbot, reconnaissance vocale, analyse d'image, traduction, etc.). Plusieurs fonctionnalités IA sont encouragées.
-- **Base de données :** Utilisez uniquement des bases cloud — **Supabase** ou **MongoDB** (SQLite interdit).
+- **Base de données :** Utilisez des bases cloud pour les projets déployés — **Supabase** ou **MongoDB**. SQLite est autorisé uniquement pour les applications hors-ligne (p. ex. stockage local); les projets déployés doivent utiliser une base cloud.
 - **Déploiement :** Le produit final doit être déployé et accessible publiquement (web, mobile ou desktop).
 - **GitHub :** Chaque étudiant doit montrer une activité visible (commits/branches/push). Invitez le Prof. Chafik Boulealam dans votre dépôt.
 
