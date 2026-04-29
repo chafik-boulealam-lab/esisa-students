@@ -9,20 +9,15 @@ env_path = Path(__file__).parent.parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 from app.core.database import Base, engine
-from app.models.models import User, Candidate, Skill, CandidateSkill, Experience, Education, JobCriteria, CriteriaSkill, MatchResult, Favorite
-from app.api import auth, candidates, skills, jobs, matching, favorites, experiences, educations, match_results
-from app.api.chat import router as chat_router
-from app.api.export import router as export_router
-from app.api.criteria import criteria_router, matching_router
+import importlib
+import logging
 
-# Create database tables on startup
-Base.metadata.create_all(bind=engine)
-
-# Initialize FastAPI app
+# Initialize FastAPI app early so lightweight endpoints work even if heavy
+# ML-related dependencies fail to import. Routers are added conditionally.
 app = FastAPI(
-    title="AI Talent Finder", 
+    title="AI Talent Finder",
     version="1.0.0",
-    redirect_slashes=False
+    redirect_slashes=False,
 )
 
 # Configure CORS
@@ -32,26 +27,46 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-# Include routers (Auth must be first)
-app.include_router(auth.router)
-app.include_router(candidates.router)
-app.include_router(skills.router)
-app.include_router(jobs.router)
-app.include_router(criteria_router)
-app.include_router(matching.router)
-app.include_router(matching_router)
-app.include_router(favorites.router)
-app.include_router(experiences.router)
-app.include_router(educations.router)
-app.include_router(match_results.router)
-app.include_router(chat_router)
-app.include_router(export_router)
 
-# Health check endpoint
+def include_optional_router(module_path: str, attr_name: str = "router"):
+    try:
+        module = importlib.import_module(module_path)
+        router = getattr(module, attr_name)
+        app.include_router(router)
+        logging.info(f"Included router {module_path}.{attr_name}")
+    except Exception as e:
+        logging.warning(f"Skipping router {module_path}.{attr_name}: {e}")
+
+
+@app.on_event("startup")
+def on_startup():
+    # Ensure database tables exist (best-effort)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        logging.exception("Failed to create database tables: %s", e)
+
+    # Conditionally include API routers. If a router import fails (e.g. heavy
+    # ML dependencies missing), the app still starts and exposes /health.
+    include_optional_router("app.api.auth")
+    include_optional_router("app.api.candidates")
+    include_optional_router("app.api.skills")
+    include_optional_router("app.api.jobs")
+    include_optional_router("app.api.criteria", "criteria_router")
+    include_optional_router("app.api.criteria", "matching_router")
+    include_optional_router("app.api.matching")
+    include_optional_router("app.api.favorites")
+    include_optional_router("app.api.experiences")
+    include_optional_router("app.api.educations")
+    include_optional_router("app.api.match_results")
+    include_optional_router("app.api.chat", "router")
+    include_optional_router("app.api.export", "router")
+
+
+# Health check endpoint (always available)
 @app.get("/health")
 def health():
-    """Health check endpoint"""
     return {"status": "ok", "version": "1.0.0"}
