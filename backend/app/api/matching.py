@@ -172,116 +172,67 @@ def _build_criteria_response(criteria: JobCriteria, db: Session) -> JobCriteriaR
 
 
 def _compute_candidate_matches(criteria: JobCriteria, db: Session) -> List[CandidateMatchResponse]:
-    # Mode 2 handlers moved earlier to avoid conflicts with dynamic `{criteria_id}` routes.
-            titles_lower = [str(t).lower() for t in job_titles] if isinstance(job_titles, list) else []
-            
-            # Look for seniority indicators
-            seniority_keywords = {
-                "senior": 90,
-                "lead": 85,
-                "principal": 95,
-                "manager": 80,
-                "architect": 90,
-                "director": 85,
-                "junior": 40,
-                "intern": 20,
-                "mid": 60,
-                "mid-level": 65
-            }
-            
-            for title in titles_lower:
-                for keyword, score in seniority_keywords.items():
-                    if keyword in title:
-                        experience_score = max(experience_score, score)
-                        break
-        except (json.JSONDecodeError, TypeError):
-            pass
-    
-    # ===== COMPONENT 3: INDUSTRY/COMPANY RELEVANCE =====
-    company_relevance_score = 50.0  # Default baseline
-    
-    if criteria_companies and candidate.extracted_companies:
-        import json
-        try:
-            candidate_companies = json.loads(candidate.extracted_companies)
-            companies_lower = [str(c).lower() for c in candidate_companies] if isinstance(candidate_companies, list) else []
-            criteria_companies_lower = [c.lower() for c in criteria_companies]
-            
-            # Check for industry overlap
-            matching_companies = sum(1 for cc in companies_lower for sc in criteria_companies_lower if cc in sc or sc in cc)
-            
-            company_relevance_score = min(100, 50 + (matching_companies * 15))
-        except (json.JSONDecodeError, TypeError):
-            pass
-    
-    # ===== COMPONENT 4: EDUCATION SIGNAL =====
-    education_score = 50.0
-    if candidate.extracted_education:
-        import json
-        try:
-            education_items = json.loads(candidate.extracted_education)
-            education_text = " ".join(str(e).lower() for e in education_items) if isinstance(education_items, list) else ""
-            if any(keyword in education_text for keyword in ["phd", "doctor", "doctorate"]):
-                education_score = 95.0
-            elif any(keyword in education_text for keyword in ["master", "msc", "mba", "engineer"]):
-                education_score = 85.0
-            elif any(keyword in education_text for keyword in ["bachelor", "licence", "degree"]):
-                education_score = 75.0
-        except (json.JSONDecodeError, TypeError):
-            pass
+    from ai_module.matching import CosineScorer
 
-    # ===== COMPONENT 5: DATA QUALITY BOOSTING =====
-    quality_boost = 1.0
-    if candidate.extraction_quality_score and candidate.extraction_quality_score > 0:
-        # High quality extractions get a boost (up to 10%)
-        quality_boost = 1.0 + (candidate.extraction_quality_score / 1000.0)
+    # Build criteria skills dict from DB
+    criteria_skills_db = db.query(CriteriaSkill).filter(CriteriaSkill.criteria_id == criteria.id).all()
+    criteria_skills_dict = {cs.skill.name: _normalize_weight(cs.weight) for cs in criteria_skills_db}
 
-    # ===== FINAL SCORE CALCULATION =====
-    # Dynamic business weighting based on signal richness.
-    weights = {
-        "skills": 0.50,
-        "experience": 0.20,
-        "education": 0.20,
-        "company": 0.10,
-    }
+    # Build global skill dictionary (all known skills)
+    all_skills_objs = db.query(Skill).all()
+    all_skills = [s.name for s in all_skills_objs]
 
-    if not candidate.extracted_education:
-        weights["skills"] += 0.10
-        weights["education"] -= 0.10
+    results: List[CandidateMatchResponse] = []
 
-    if not candidate.extracted_companies:
-        weights["skills"] += 0.05
-        weights["company"] -= 0.05
+    # Iterate candidates and score them
+    candidates = db.query(Candidate).all()
+    for cand in candidates:
+        cand_skills = [cs.skill.name for cs in getattr(cand, "candidate_skills", [])]
+        details = CosineScorer.calculate_match_score(cand_skills, criteria_skills_dict, all_skills)
+        score = details.get("score", 0.0)
 
-    final_score = (
-        skill_score * weights["skills"] +
-        experience_score * weights["experience"] +
-        education_score * weights["education"] +
-        company_relevance_score * weights["company"]
-    ) * quality_boost
-    
-    final_score = min(100.0, max(0.0, final_score))
-    
-    return final_score, {
-        "method": "ner_enhanced" if candidate.is_fully_extracted else "standard",
-        "component_scores": {
-            "skills": min(100, skill_score),
-            "experience_level": experience_score,
-            "education": education_score,
-            "company_relevance": company_relevance_score,
-            "data_quality_boost": (quality_boost - 1.0) * 100,
-            "dynamic_weights": weights,
-        },
-        "matched_skills": matched_skills_count,
-        "total_skills": len(criteria_skills),
-        "extraction_quality": candidate.extraction_quality_score or 0,
-        "fully_extracted": candidate.is_fully_extracted,
-        "data_sources": {
-            "skills_from": "database_linked" if candidate.candidate_skills else "none",
-            "experience_from": "ner_extracted" if candidate.extracted_job_titles else "none",
-            "companies_from": "ner_extracted" if candidate.extracted_companies else "none"
-        }
-    }
+        results.append(CandidateMatchResponse(
+            candidate_id=cast(int, cand.id),
+            full_name=cast(str, cand.full_name),
+            email=cast(str, cand.email),
+            match_score=score,
+            explanation=str(details.get("skill_breakdown", {}))
+        ))
+
+    # Sort descending by score
+    results.sort(key=lambda r: r.match_score, reverse=True)
+    return results
+
+
+def calculate_match_score(candidate: Candidate, criteria_skills: List[dict] | Dict[str, int], criteria_job_title: str = "") -> Tuple[float, Dict]:
+    """Wrapper that adapts candidate/criteria structures to the internal scorer."""
+    from ai_module.matching import CosineScorer
+
+    # Normalize criteria to dict
+    criteria_dict: Dict[str, int] = {}
+    if isinstance(criteria_skills, dict):
+        criteria_dict = {k: _normalize_weight(v) for k, v in criteria_skills.items()}
+    else:
+        for item in (criteria_skills or []):
+            if isinstance(item, dict):
+                name = item.get("name") or item.get("skill")
+                weight = item.get("weight", 50)
+                if name:
+                    criteria_dict[name] = _normalize_weight(weight)
+
+    # Candidate skills extraction
+    candidate_skills = []
+    try:
+        candidate_skills = [cs.skill.name for cs in getattr(candidate, "candidate_skills", [])]
+    except Exception:
+        if isinstance(candidate, dict):
+            candidate_skills = candidate.get("skills", []) or []
+
+    # Build a minimal all_skills list (union of both sets)
+    all_skills = list({*candidate_skills, *list(criteria_dict.keys())})
+
+    details = CosineScorer.calculate_match_score(candidate_skills, criteria_dict, all_skills)
+    return details.get("score", 0.0), details
 
 
 
